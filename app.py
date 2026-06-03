@@ -2,6 +2,8 @@
 
 import asyncio
 import os
+import random
+import re
 from typing import Optional
 
 from dotenv import load_dotenv
@@ -13,6 +15,7 @@ from pydantic import BaseModel
 from temporalio.client import Client
 
 from profiles import PROFILES, get_profile
+from shared import LoanApplicant
 from workflow import LoanUnderwritingWorkflow
 
 load_dotenv()
@@ -58,6 +61,57 @@ async def list_profiles():
         }
         for p in PROFILES
     ]
+
+
+class CustomApplicantRequest(BaseModel):
+    name: str
+    occupation: str
+    loan_amount: float
+    annual_income: float
+    loan_purpose: str
+
+
+def _infer_credit_score(annual_income: float) -> int:
+    """Assign a plausible credit score based on income tier."""
+    if annual_income <= 0:
+        return 0
+    elif annual_income < 37500:
+        return random.randint(480, 580)
+    elif annual_income < 75000:
+        return random.randint(580, 670)
+    elif annual_income < 150000:
+        return random.randint(670, 740)
+    else:
+        return random.randint(740, 820)
+
+
+# NOTE: /apply/custom MUST be defined before /apply/{profile_id}
+# otherwise FastAPI matches "custom" as a profile_id param.
+@app.post("/apply/custom")
+async def apply_custom(body: CustomApplicantRequest):
+    applicant_id = "custom-" + re.sub(r"[^a-z0-9]", "-", body.name.lower())[:20]
+    applicant = LoanApplicant(
+        id=applicant_id,
+        name=body.name,
+        occupation=body.occupation,
+        loan_amount=body.loan_amount,
+        loan_purpose=body.loan_purpose,
+        annual_income=body.annual_income,
+        credit_score=_infer_credit_score(body.annual_income),
+        fun_fact=f"Application submitted directly at the booth. Occupation: {body.occupation}.",
+    )
+
+    client = await get_client()
+    workflow_id = f"loan-{applicant_id}-{generate(size=6)}"
+
+    await client.start_workflow(
+        LoanUnderwritingWorkflow.run,
+        applicant,
+        id=workflow_id,
+        task_queue=TASK_QUEUE,
+    )
+
+    return {"workflow_id": workflow_id}
 
 
 @app.post("/apply/{profile_id}")
