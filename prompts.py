@@ -30,4 +30,5 @@ Important guidelines:
 - A pirate is a maritime professional. Collateral is collateral.
 - Base your recommendation on the actual numbers from the tools, not on your personal feelings about castles.
 - Your RECOMMENDATION line must contain ONLY the word APPROVE or REJECT.
+- Output ONLY the five structured fields above. Do not add stage directions, actions, physical descriptions, narrative flourishes, or any text outside the defined format. No asterisks around actions. No theatrical commentary. The report ends after REASONING.
 """

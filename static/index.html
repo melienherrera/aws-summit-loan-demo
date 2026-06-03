@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Temporal National Bank — AI Loan Underwriting</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     :root {
       --bg: #0d0f14;
@@ -332,8 +333,12 @@
       line-height: 1.8;
       white-space: pre-wrap;
     }
-    .assessment-box .assessment-line { display: block; margin-bottom: 0.5rem; }
-    .assessment-box .label { color: var(--accent); font-weight: 600; }
+    .assessment-box p { margin-bottom: 0.75rem; }
+    .assessment-box strong { color: var(--text); }
+    .assessment-box h1, .assessment-box h2, .assessment-box h3 { color: var(--accent); margin: 1rem 0 0.5rem; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .assessment-box ul, .assessment-box ol { padding-left: 1.5rem; margin-bottom: 0.75rem; }
+    .assessment-box li { margin-bottom: 0.3rem; }
+    .assessment-box hr { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
 
     .decision-prompt {
       text-align: center;
@@ -656,17 +661,9 @@
     badge.textContent = `LENNY: ${recommendation}`;
     badge.className = `ai-badge ${recommendation === 'APPROVE' ? 'approve' : 'reject'}`;
 
-    // Format assessment nicely
+    // Render assessment as markdown
     const box = document.getElementById('assessment-box');
-    box.innerHTML = lines.map(line => {
-      const colonIdx = line.indexOf(':');
-      if (colonIdx > 0 && colonIdx < 30) {
-        const label = line.slice(0, colonIdx);
-        const rest = line.slice(colonIdx);
-        return `<span class="assessment-line"><span class="label">${label}</span>${rest}</span>`;
-      }
-      return `<span class="assessment-line">${line}</span>`;
-    }).join('');
+    box.innerHTML = marked.parse(assessment);
 
     document.getElementById('submit-btn').disabled = false;
     document.getElementById('submit-btn').textContent = 'Submit to LENNY →';
