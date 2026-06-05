@@ -24,6 +24,24 @@ load_dotenv()
 TASK_QUEUE = "loan-underwriting"
 
 
+async def _connect_temporal_client() -> Client:
+    address = os.environ.get("TEMPORAL_ADDRESS", "localhost:7233")
+    namespace = os.environ.get("TEMPORAL_NAMESPACE", "default")
+    api_key = os.environ.get("TEMPORAL_API_KEY")
+
+    connect_kwargs: dict[str, object] = {"namespace": namespace}
+    is_cloud_endpoint = ".tmprl.cloud" in address
+
+    if api_key:
+        connect_kwargs["api_key"] = api_key
+
+    if api_key or is_cloud_endpoint:
+        # Temporal Cloud requires TLS and supports API key auth.
+        connect_kwargs["tls"] = True
+
+    return await Client.connect(address, **connect_kwargs)
+
+
 def _divider() -> None:
     print("\n" + "─" * 60 + "\n")
 
@@ -117,9 +135,7 @@ async def main() -> None:
     _print_profile(applicant)
     input("  Press Enter to submit application and start AI assessment...")
 
-    client = await Client.connect(
-        os.environ.get("TEMPORAL_ADDRESS", "localhost:7233")
-    )
+    client = await _connect_temporal_client()
 
     workflow_id = f"loan-{applicant.id}-{generate(size=6)}"
     handle = await client.start_workflow(

@@ -16,11 +16,27 @@ load_dotenv()
 TASK_QUEUE = "loan-underwriting"
 
 
+def _temporal_connect_options() -> dict[str, str | bool]:
+    """Build Temporal client connection options from environment variables."""
+    options: dict[str, str | bool] = {}
+    namespace = os.environ.get("TEMPORAL_NAMESPACE")
+    api_key = os.environ.get("TEMPORAL_API_KEY")
+
+    if namespace:
+        options["namespace"] = namespace
+    if api_key:
+        options["api_key"] = api_key
+        options["tls"] = True
+
+    return options
+
+
 async def main() -> None:
     plugin = StrandsPlugin()
     client = await Client.connect(
         os.environ.get("TEMPORAL_ADDRESS", "localhost:7233"),
         plugins=[plugin],
+        **_temporal_connect_options(),
     )
 
     worker = Worker(

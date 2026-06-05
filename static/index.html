@@ -38,12 +38,12 @@
       display: flex;
       align-items: center;
       gap: 1rem;
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
     }
-    .logo {
-      font-size: 1.25rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
+    .logo { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
     .logo span { color: var(--accent); }
     .badge {
       font-size: 0.7rem;
@@ -67,32 +67,111 @@
     .powered strong { color: var(--text); }
 
     /* ── Screens ── */
-    .screen { display: none; padding: 2rem; max-width: 1100px; margin: 0 auto; }
+    .screen { display: none; }
     .screen.active { display: block; }
 
-    /* ── Screen 1: Profile Grid ── */
-    .screen-title {
-      font-size: 1.75rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
+    /* ── Screen 1: Landing ── */
+    #screen-1 { max-width: 860px; margin: 0 auto; padding: 3rem 2rem 4rem; }
+
+    .hero-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.6rem;
+      line-height: 1.1;
     }
-    .screen-subtitle {
+    .hero-title span { color: var(--accent); }
+    .hero-sub {
       color: var(--text-muted);
-      margin-bottom: 2rem;
-      font-size: 1rem;
+      font-size: 1.05rem;
+      margin-bottom: 2.5rem;
+      line-height: 1.6;
     }
 
+    /* ── Custom Form ── */
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .form-card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .form-input, .form-select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+      width: 100%;
+    }
+    .form-input:focus, .form-select:focus { border-color: var(--accent); }
+    .form-select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237a84a0' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.5rem; }
+    .form-select option { background: #1e2330; }
+
+    /* ── Divider ── */
+    .or-divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 2.5rem 0;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .or-divider::before, .or-divider::after {
+      content: '';
+      flex: 1;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Profile Grid ── */
+    .profiles-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+    .profiles-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
     .profile-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 0.75rem;
     }
-
     .profile-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 1.5rem;
+      padding: 1.25rem;
       cursor: pointer;
       transition: all 0.15s ease;
       position: relative;
@@ -111,54 +190,20 @@
       background: var(--accent-glow);
       pointer-events: none;
     }
-    .card-name {
-      font-size: 1.15rem;
-      font-weight: 700;
-      margin-bottom: 0.25rem;
-    }
-    .card-occupation {
-      font-size: 0.8rem;
-      color: var(--accent);
-      margin-bottom: 1rem;
-      font-weight: 500;
-    }
-    .card-loan {
-      font-size: 1.5rem;
-      font-weight: 800;
-      margin-bottom: 0.25rem;
-      letter-spacing: -0.02em;
-    }
-    .card-purpose {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      line-height: 1.4;
-    }
-    .card-arrow {
-      position: absolute;
-      top: 1.25rem;
-      right: 1.25rem;
-      color: var(--text-muted);
-      font-size: 1.2rem;
-      opacity: 0;
-      transition: opacity 0.15s;
-    }
+    .card-name { font-size: 1rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .card-occupation { font-size: 0.75rem; color: var(--accent); margin-bottom: 0.75rem; font-weight: 500; }
+    .card-loan { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.2rem; letter-spacing: -0.02em; }
+    .card-purpose { font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; }
+    .card-arrow { position: absolute; top: 1rem; right: 1rem; color: var(--text-muted); opacity: 0; transition: opacity 0.15s; }
     .profile-card:hover .card-arrow { opacity: 1; }
 
-    /* ── Screen 2: Application Review ── */
-    .two-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
-      align-items: start;
-    }
-
+    /* ── Shared panel/form styles ── */
     .panel {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 1.75rem;
     }
-
     .panel-title {
       font-size: 0.7rem;
       text-transform: uppercase;
@@ -167,7 +212,6 @@
       margin-bottom: 1.25rem;
       font-weight: 600;
     }
-
     .detail-row {
       display: flex;
       justify-content: space-between;
@@ -179,7 +223,6 @@
     .detail-row:last-child { border-bottom: none; }
     .detail-label { color: var(--text-muted); }
     .detail-value { font-weight: 600; text-align: right; max-width: 60%; }
-
     .fun-fact-box {
       margin-top: 1.25rem;
       background: var(--surface2);
@@ -192,18 +235,7 @@
     }
     .fun-fact-box strong { color: var(--yellow); display: block; margin-bottom: 0.4rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
 
-    .submit-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-    .submit-description {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      line-height: 1.6;
-    }
-    .submit-description strong { color: var(--text); }
-
+    /* ── Buttons ── */
     .btn {
       display: inline-flex;
       align-items: center;
@@ -218,120 +250,97 @@
       transition: all 0.15s ease;
       letter-spacing: -0.01em;
     }
-    .btn-primary {
-      background: var(--accent);
-      color: white;
-      width: 100%;
-    }
-    .btn-primary:hover { filter: brightness(1.15); transform: translateY(-1px); }
-    .btn-secondary {
-      background: transparent;
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      width: 100%;
-    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; filter: none !important; }
+    .btn-primary { background: var(--accent); color: white; width: 100%; }
+    .btn-primary:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-1px); }
+    .btn-secondary { background: transparent; color: var(--text-muted); border: 1px solid var(--border); width: 100%; }
     .btn-secondary:hover { border-color: var(--text-muted); color: var(--text); }
-    .btn-approve {
-      background: var(--green);
-      color: white;
-      flex: 1;
-      font-size: 1.1rem;
-      padding: 1.1rem;
-    }
-    .btn-approve:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 4px 20px var(--green-glow); }
-    .btn-reject {
-      background: var(--red);
-      color: white;
-      flex: 1;
-      font-size: 1.1rem;
-      padding: 1.1rem;
-    }
-    .btn-reject:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 4px 20px var(--red-glow); }
-
-    /* ── Screen 3: Loading ── */
-    .loading-center {
+    .btn-approve { background: var(--green); color: white; flex: 1; font-size: 1.1rem; padding: 1.1rem; }
+    .btn-approve:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 4px 20px var(--green-glow); }
+    .btn-reject { background: var(--red); color: white; flex: 1; font-size: 1.1rem; padding: 1.1rem; }
+    .btn-reject:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 4px 20px var(--red-glow); }
+    .bulk-actions {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-top: 1rem;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 60vh;
-      gap: 1.5rem;
-      text-align: center;
+      gap: 0.6rem;
     }
-    .spinner {
-      width: 56px;
-      height: 56px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.9s linear infinite;
+    .bulk-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      font-weight: 600;
     }
+    .bulk-sub {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    .bulk-status {
+      font-size: 0.82rem;
+      min-height: 1.2rem;
+      color: var(--text-muted);
+    }
+    .bulk-button-row {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr;
+      gap: 0.5rem;
+    }
+    .btn-danger {
+      background: transparent;
+      color: var(--red);
+      border: 1px solid var(--red);
+      width: 100%;
+    }
+    .btn-danger:hover:not(:disabled) {
+      background: var(--red-glow);
+      color: #ffb4b4;
+    }
+
+    /* ── Screen 2: Application Review ── */
+    #screen-2 { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+    .submit-panel { display: flex; flex-direction: column; gap: 1rem; }
+    .submit-description { font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; }
+    .submit-description strong { color: var(--text); }
+
+    /* ── Screen 3: Loading ── */
+    #screen-3 { padding: 2rem; }
+    .loading-center {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; min-height: 60vh; gap: 1.5rem; text-align: center;
+    }
+    .spinner { width: 56px; height: 56px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.9s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .loading-title { font-size: 1.5rem; font-weight: 700; }
     .loading-sub { color: var(--text-muted); font-size: 0.95rem; }
-
-    .activity-feed {
-      margin-top: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      width: 100%;
-      max-width: 400px;
-    }
+    .activity-feed { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; width: 100%; max-width: 400px; }
     .activity-item {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.6rem 1rem;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      animation: fadeIn 0.3s ease;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+      padding: 0.6rem 1rem; font-size: 0.8rem; color: var(--text-muted);
+      display: flex; align-items: center; gap: 0.6rem; animation: fadeIn 0.3s ease;
     }
     .activity-item.done { border-color: var(--green); color: var(--text); }
-    .activity-item.done .activity-dot { background: var(--green); }
-    .activity-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-      flex-shrink: 0;
-      animation: pulse 1s ease infinite;
-    }
-    .activity-item.done .activity-dot { animation: none; }
+    .activity-item.done .activity-dot { background: var(--green); animation: none; }
+    .activity-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; animation: pulse 1s ease infinite; }
     @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
     /* ── Screen 4: Verdict ── */
-    .verdict-header {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
+    #screen-4 { max-width: 860px; margin: 0 auto; padding: 2rem; }
+    .verdict-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
     .applicant-name-large { font-size: 1.75rem; font-weight: 800; }
-    .ai-badge {
-      padding: 0.4rem 1rem;
-      border-radius: 999px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
+    .ai-badge { padding: 0.4rem 1rem; border-radius: 999px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
     .ai-badge.approve { background: var(--green-glow); color: var(--green); border: 1px solid var(--green); }
     .ai-badge.reject { background: var(--red-glow); color: var(--red); border: 1px solid var(--red); }
-
     .assessment-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.75rem;
-      margin-bottom: 1.5rem;
-      font-size: 0.9rem;
-      line-height: 1.8;
-      white-space: pre-wrap;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 1.75rem; margin-bottom: 1.5rem; font-size: 0.9rem; line-height: 1.8;
     }
     .assessment-box p { margin-bottom: 0.75rem; }
     .assessment-box strong { color: var(--text); }
@@ -339,83 +348,26 @@
     .assessment-box ul, .assessment-box ol { padding-left: 1.5rem; margin-bottom: 0.75rem; }
     .assessment-box li { margin-bottom: 0.3rem; }
     .assessment-box hr { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
-
-    .decision-prompt {
-      text-align: center;
-      margin-bottom: 1rem;
-    }
+    .decision-prompt { text-align: center; margin-bottom: 1rem; }
     .decision-prompt h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.4rem; }
     .decision-prompt p { color: var(--text-muted); font-size: 0.9rem; }
-
-    .decision-buttons {
-      display: flex;
-      gap: 1rem;
-    }
-
-    .workflow-id {
-      margin-top: 1.5rem;
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      text-align: center;
-      font-family: monospace;
-    }
+    .decision-buttons { display: flex; gap: 1rem; }
+    .workflow-id { margin-top: 1.5rem; font-size: 0.72rem; color: var(--text-muted); text-align: center; font-family: monospace; }
 
     /* ── Screen 5: Result ── */
-    .result-center {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 60vh;
-      gap: 1.25rem;
-      text-align: center;
-    }
+    #screen-5 { padding: 2rem; }
+    .result-center { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; gap: 1.25rem; text-align: center; }
     .result-emoji { font-size: 5rem; line-height: 1; }
-    .result-decision {
-      font-size: 2.5rem;
-      font-weight: 900;
-      letter-spacing: -0.03em;
-    }
+    .result-decision { font-size: 2.5rem; font-weight: 900; letter-spacing: -0.03em; }
     .result-decision.approved { color: var(--green); }
     .result-decision.rejected { color: var(--red); }
     .result-name { font-size: 1.1rem; color: var(--text-muted); }
-    .result-override {
-      background: var(--surface);
-      border: 1px solid var(--yellow);
-      border-radius: 8px;
-      padding: 0.75rem 1.5rem;
-      font-size: 0.85rem;
-      color: var(--yellow);
-      max-width: 420px;
-    }
-    .result-agree {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.75rem 1.5rem;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      max-width: 420px;
-    }
-    .result-closing {
-      font-size: 1rem;
-      color: var(--text-muted);
-      font-style: italic;
-    }
+    .result-override { background: var(--surface); border: 1px solid var(--yellow); border-radius: 8px; padding: 0.75rem 1.5rem; font-size: 0.85rem; color: var(--yellow); max-width: 420px; }
+    .result-agree { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1.5rem; font-size: 0.85rem; color: var(--text-muted); max-width: 420px; }
+    .result-closing { font-size: 1rem; color: var(--text-muted); font-style: italic; }
 
     /* ── Back button ── */
-    .back-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      margin-bottom: 1.5rem;
-      padding: 0;
-    }
+    .back-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 0.4rem; margin-bottom: 1.5rem; padding: 0; }
     .back-btn:hover { color: var(--text); }
   </style>
 </head>
@@ -429,18 +381,126 @@
   </div>
 </header>
 
-<!-- Screen 1: Profile Selection -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- Screen 1: Landing — Custom Form + Profile Grid         -->
+<!-- ═══════════════════════════════════════════════════════ -->
 <div id="screen-1" class="screen active">
-  <p class="screen-title">Select a Loan Applicant</p>
-  <p class="screen-subtitle">Choose a profile. Our AI underwriter LENNY will assess the application — then you make the final call.</p>
-  <div class="profile-grid" id="profile-grid">
-    <!-- populated by JS -->
+
+  <div class="hero-title" style="padding: 3rem 2rem 0; max-width: 860px; margin: 0 auto;">
+    Apply for a loan.<br><span>LENNY</span> will decide.
   </div>
+  <p class="hero-sub" style="padding: 0.6rem 2rem 0; max-width: 860px; margin: 0 auto;">
+    Our AI underwriter reviews every application with the utmost professionalism.<br>Then you make the final call.
+  </p>
+
+  <!-- Custom Form -->
+  <div style="max-width: 860px; margin: 2rem auto 0; padding: 0 2rem;">
+    <div class="form-card">
+      <div class="form-card-title">Your Loan Application</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input class="form-input" id="f-name" type="text" placeholder="Your name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Occupation</label>
+          <select class="form-select" id="f-occupation">
+            <option value="">Select...</option>
+            <option>Software Engineer</option>
+            <option>Product Manager</option>
+            <option>Founder / CEO</option>
+            <option>Student</option>
+            <option>Freelancer</option>
+            <option>Doctor</option>
+            <option>Teacher</option>
+            <option>Professional Dragon Tamer</option>
+            <option>Retired Pirate</option>
+            <option>Interdimensional Trader</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Loan Amount</label>
+          <select class="form-select" id="f-amount">
+            <option value="">Select...</option>
+            <option value="10000">$10,000</option>
+            <option value="25000">$25,000</option>
+            <option value="50000">$50,000</option>
+            <option value="100000">$100,000</option>
+            <option value="250000">$250,000</option>
+            <option value="500000">$500,000</option>
+            <option value="1000000">$1,000,000</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Annual Income</label>
+          <select class="form-select" id="f-income">
+            <option value="">Select...</option>
+            <option value="0">$0 (it's complicated)</option>
+            <option value="37500">$25,000 – $50,000</option>
+            <option value="75000">$50,000 – $100,000</option>
+            <option value="150000">$100,000 – $200,000</option>
+            <option value="250000">$200,000+</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Loan Purpose</label>
+          <select class="form-select" id="f-purpose">
+            <option value="">Select...</option>
+            <option>Home purchase</option>
+            <option>Business expansion</option>
+            <option>Education</option>
+            <option>Debt consolidation</option>
+            <option>Vacation home</option>
+            <option>Starting a band</option>
+            <option>Buying a boat (not a pirate ship)</option>
+            <option>Funding a startup that definitely won't fail</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="submitCustom()" id="custom-submit-btn">
+        Submit to LENNY →
+      </button>
+    </div>
+    <div class="bulk-actions">
+      <div class="bulk-title">Load Test</div>
+      <p class="bulk-sub">
+        Start 100 workflows at once using generated dummy applicants.
+      </p>
+      <div class="bulk-button-row">
+        <button class="btn btn-secondary" onclick="startBulkWorkflows()" id="bulk-start-btn">
+          Bulk procress Load Underwriting applications
+        </button>
+        <button class="btn btn-approve" onclick="bulkDecide('approve')" id="bulk-approve-btn" disabled>
+          Bulk Approve
+        </button>
+        <button class="btn btn-danger" onclick="bulkDecide('reject')" id="bulk-reject-btn" disabled>
+          Bulk Reject
+        </button>
+      </div>
+      <div class="bulk-status" id="bulk-status"></div>
+    </div>
+  </div>
+
+  <!-- Divider -->
+  <div style="max-width: 860px; margin: 0 auto; padding: 0 2rem;">
+    <div class="or-divider">or choose an existing applicant</div>
+    <div class="profiles-title">Meet our current applicants</div>
+    <p class="profiles-sub">Ranging from completely reasonable to deeply questionable.</p>
+    <div class="profile-grid" id="profile-grid">
+      <!-- populated by JS -->
+    </div>
+    <div style="height: 3rem;"></div>
+  </div>
+
 </div>
 
-<!-- Screen 2: Application Review -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- Screen 2: Application Review (profile cards only)      -->
+<!-- ═══════════════════════════════════════════════════════ -->
 <div id="screen-2" class="screen">
-  <button class="back-btn" onclick="goTo(1)">← Back to applicants</button>
+  <button class="back-btn" onclick="goTo(1)">← Back</button>
   <div class="two-col">
     <div>
       <div class="panel">
@@ -469,7 +529,9 @@
   </div>
 </div>
 
-<!-- Screen 3: Loading -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- Screen 3: Loading                                      -->
+<!-- ═══════════════════════════════════════════════════════ -->
 <div id="screen-3" class="screen">
   <div class="loading-center">
     <div class="spinner"></div>
@@ -481,7 +543,9 @@
   </div>
 </div>
 
-<!-- Screen 4: Verdict + Human Decision -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- Screen 4: Verdict + Human Decision                     -->
+<!-- ═══════════════════════════════════════════════════════ -->
 <div id="screen-4" class="screen">
   <div class="verdict-header">
     <div>
@@ -502,7 +566,9 @@
   <div class="workflow-id" id="workflow-id-display"></div>
 </div>
 
-<!-- Screen 5: Final Result -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- Screen 5: Final Result                                 -->
+<!-- ═══════════════════════════════════════════════════════ -->
 <div id="screen-5" class="screen">
   <div class="result-center">
     <div class="result-emoji" id="result-emoji"></div>
@@ -520,6 +586,7 @@
   let currentProfile = null;
   let currentWorkflowId = null;
   let pollInterval = null;
+  let bulkWorkflowIds = [];
 
   const CLOSINGS = {
     "Nicolas Cage": "May his castle dreams live on.",
@@ -535,9 +602,10 @@
   function goTo(n) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(`screen-${n}`).classList.add('active');
+    window.scrollTo(0, 0);
   }
 
-  // ── Load profiles on boot ──
+  // ── Load profiles ──
   async function loadProfiles() {
     const res = await fetch('/profiles');
     const profiles = await res.json();
@@ -553,10 +621,113 @@
     `).join('');
   }
 
+  // ── Custom form submit ──
+  async function submitCustom() {
+    const name = document.getElementById('f-name').value.trim();
+    const occupation = document.getElementById('f-occupation').value;
+    const amount = document.getElementById('f-amount').value;
+    const income = document.getElementById('f-income').value;
+    const purpose = document.getElementById('f-purpose').value;
+
+    if (!name || !occupation || !amount || !income || !purpose) {
+      alert('Please fill in all fields before submitting.');
+      return;
+    }
+
+    const btn = document.getElementById('custom-submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+
+    const res = await fetch('/apply/custom', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, occupation, loan_amount: parseFloat(amount), annual_income: parseFloat(income), loan_purpose: purpose }),
+    });
+    const data = await res.json();
+    currentWorkflowId = data.workflow_id;
+    currentProfile = { name };
+
+    btn.disabled = false;
+    btn.textContent = 'Submit to LENNY →';
+
+    startLoading(name);
+  }
+
+  // ── Bulk workflow start ──
+  async function startBulkWorkflows() {
+    const btn = document.getElementById('bulk-start-btn');
+    const bulkApproveBtn = document.getElementById('bulk-approve-btn');
+    const bulkRejectBtn = document.getElementById('bulk-reject-btn');
+    const status = document.getElementById('bulk-status');
+    btn.disabled = true;
+    bulkApproveBtn.disabled = true;
+    bulkRejectBtn.disabled = true;
+    btn.textContent = 'Starting 100 workflows...';
+    status.textContent = 'Submitting bulk start request...';
+
+    try {
+      const res = await fetch('/apply/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ count: 100 }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Bulk start failed');
+      }
+
+      const data = await res.json();
+      bulkWorkflowIds = data.workflow_ids || [];
+      bulkApproveBtn.disabled = bulkWorkflowIds.length === 0;
+      bulkRejectBtn.disabled = bulkWorkflowIds.length === 0;
+      status.textContent = `Started ${data.started} workflows.`;
+    } catch (err) {
+      bulkWorkflowIds = [];
+      status.textContent = 'Failed to start workflows. Check server logs.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Bulk procress Load Underwriting applications';
+    }
+  }
+
+  async function bulkDecide(decision) {
+    const status = document.getElementById('bulk-status');
+    const bulkApproveBtn = document.getElementById('bulk-approve-btn');
+    const bulkRejectBtn = document.getElementById('bulk-reject-btn');
+
+    if (!bulkWorkflowIds.length) {
+      status.textContent = 'Start a bulk batch first.';
+      return;
+    }
+
+    bulkApproveBtn.disabled = true;
+    bulkRejectBtn.disabled = true;
+    status.textContent = `Sending bulk ${decision} signal...`;
+
+    try {
+      const res = await fetch('/decide-bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decision, workflow_ids: bulkWorkflowIds }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Bulk decision failed');
+      }
+
+      const data = await res.json();
+      status.textContent = `${decision.toUpperCase()} sent to ${data.signaled}/${data.requested} workflows.`;
+    } catch (err) {
+      status.textContent = `Failed to send bulk ${decision} signal.`;
+    } finally {
+      bulkApproveBtn.disabled = false;
+      bulkRejectBtn.disabled = false;
+    }
+  }
+
   // ── Select profile → Screen 2 ──
   function selectProfile(profile) {
     currentProfile = profile;
-
     const rows = [
       ['Applicant', profile.name],
       ['Occupation', profile.occupation],
@@ -564,43 +735,45 @@
       ['Purpose', profile.loan_purpose],
       ['Annual Income', `$${profile.annual_income.toLocaleString()}`],
     ];
-
     document.getElementById('detail-rows').innerHTML = rows.map(([label, val]) => `
       <div class="detail-row">
         <span class="detail-label">${label}</span>
         <span class="detail-value">${val}</span>
       </div>
     `).join('');
-
     document.getElementById('detail-fun-fact').textContent = profile.fun_fact;
     goTo(2);
   }
 
-  // ── Submit application → Screen 3 ──
+  // ── Submit profile application → Screen 3 ──
   async function submitApplication() {
-    document.getElementById('submit-btn').disabled = true;
-    document.getElementById('submit-btn').textContent = 'Submitting...';
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
 
     const res = await fetch(`/apply/${currentProfile.id}`, { method: 'POST' });
     const data = await res.json();
     currentWorkflowId = data.workflow_id;
 
-    document.getElementById('loading-name').textContent =
-      `Reviewing application for ${currentProfile.name}`;
+    btn.disabled = false;
+    btn.textContent = 'Submit to LENNY →';
 
+    startLoading(currentProfile.name);
+  }
+
+  // ── Shared loading + polling ──
+  function startLoading(name) {
+    document.getElementById('loading-name').textContent = `Reviewing application for ${name}`;
     const feed = document.getElementById('activity-feed');
     feed.innerHTML = '';
-
     goTo(3);
 
-    // Animate activity steps
     const steps = [
       'Workflow started',
       'Running credit_check activity...',
       'Running calculate_debt_to_income activity...',
       'Generating recommendation...',
     ];
-
     let stepIndex = 0;
     const stepInterval = setInterval(() => {
       if (stepIndex < steps.length) {
@@ -608,12 +781,9 @@
         item.className = 'activity-item';
         item.innerHTML = `<div class="activity-dot"></div>${steps[stepIndex]}`;
         feed.appendChild(item);
-
-        // Mark previous step done
         if (stepIndex > 0) {
           const prev = feed.children[stepIndex - 1];
           prev.classList.add('done');
-          prev.querySelector('.activity-dot').style.animation = 'none';
         }
         stepIndex++;
       } else {
@@ -621,7 +791,6 @@
       }
     }, 1800);
 
-    // Poll for assessment
     pollInterval = setInterval(async () => {
       try {
         const r = await fetch(`/assessment/${currentWorkflowId}`);
@@ -629,12 +798,7 @@
         if (d.ready) {
           clearInterval(pollInterval);
           clearInterval(stepInterval);
-          // Mark all steps done
-          Array.from(feed.children).forEach(el => {
-            el.classList.add('done');
-            const dot = el.querySelector('.activity-dot');
-            if (dot) dot.style.animation = 'none';
-          });
+          Array.from(feed.children).forEach(el => el.classList.add('done'));
           setTimeout(() => showVerdict(d.assessment), 600);
         }
       } catch(e) { /* retry */ }
@@ -644,13 +808,10 @@
   // ── Show verdict → Screen 4 ──
   function showVerdict(assessment) {
     document.getElementById('verdict-name').textContent = currentProfile.name;
-    document.getElementById('workflow-id-display').textContent =
-      `Workflow ID: ${currentWorkflowId}`;
+    document.getElementById('workflow-id-display').textContent = `Workflow ID: ${currentWorkflowId}`;
 
-    // Parse recommendation
     let recommendation = 'REJECT';
-    const lines = assessment.split('\n');
-    for (const line of lines) {
+    for (const line of assessment.split('\n')) {
       if (line.trim().startsWith('RECOMMENDATION:')) {
         if (line.toUpperCase().includes('APPROVE')) recommendation = 'APPROVE';
         break;
@@ -661,37 +822,24 @@
     badge.textContent = `LENNY: ${recommendation}`;
     badge.className = `ai-badge ${recommendation === 'APPROVE' ? 'approve' : 'reject'}`;
 
-    // Render assessment as markdown
-    const box = document.getElementById('assessment-box');
-    box.innerHTML = marked.parse(assessment);
-
-    document.getElementById('submit-btn').disabled = false;
-    document.getElementById('submit-btn').textContent = 'Submit to LENNY →';
-
+    document.getElementById('assessment-box').innerHTML = marked.parse(assessment);
     goTo(4);
   }
 
   // ── Human decision → Screen 5 ──
   async function decide(decision) {
-    // Disable buttons immediately
     document.querySelectorAll('.btn-approve, .btn-reject').forEach(b => b.disabled = true);
-
     await fetch(`/decide/${currentWorkflowId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ decision }),
     });
-
-    // Poll for result
     const poll = setInterval(async () => {
       try {
         const r = await fetch(`/result/${currentWorkflowId}`);
         if (r.ok) {
           const result = await r.json();
-          if (result.ready) {
-            clearInterval(poll);
-            showResult(result);
-          }
+          if (result.ready) { clearInterval(poll); showResult(result); }
         }
       } catch(e) { /* retry */ }
     }, 800);
@@ -701,29 +849,20 @@
   function showResult(result) {
     const approved = result.human_decision === 'APPROVED';
     document.getElementById('result-emoji').textContent = approved ? '✅' : '❌';
-
     const decisionEl = document.getElementById('result-decision');
     decisionEl.textContent = result.human_decision;
     decisionEl.className = `result-decision ${approved ? 'approved' : 'rejected'}`;
-
-    document.getElementById('result-name').textContent =
-      `${result.applicant_name} has been ${result.human_decision.toLowerCase()}.`;
+    document.getElementById('result-name').textContent = `${result.applicant_name} has been ${result.human_decision.toLowerCase()}.`;
 
     const overrideBox = document.getElementById('result-override-box');
     if (result.human_override) {
-      overrideBox.innerHTML = `<div class="result-override">
-        ⚠️ You overruled LENNY's recommendation of ${result.ai_recommendation}.<br>
-        The human remains in control. As it should be.
-      </div>`;
+      overrideBox.innerHTML = `<div class="result-override">⚠️ You overruled LENNY's recommendation of ${result.ai_recommendation}.<br>The human remains in control. As it should be.</div>`;
     } else {
-      overrideBox.innerHTML = `<div class="result-agree">
-        🤝 You agreed with LENNY's recommendation of ${result.ai_recommendation}.
-      </div>`;
+      overrideBox.innerHTML = `<div class="result-agree">🤝 You agreed with LENNY's recommendation of ${result.ai_recommendation}.</div>`;
     }
 
     const closing = CLOSINGS[result.applicant_name] || '';
     document.getElementById('result-closing').textContent = closing;
-
     goTo(5);
   }
 
@@ -735,7 +874,6 @@
     goTo(1);
   }
 
-  // Boot
   loadProfiles();
 </script>
 </body>
