@@ -15,6 +15,7 @@ from typing import Optional
 from temporalio import workflow
 from temporalio.contrib.strands import TemporalAgent
 from temporalio.contrib.strands.workflow import activity_as_tool
+from temporalio.common import VersioningBehavior
 
 with workflow.unsafe.imports_passed_through():
     from prompts import UNDERWRITING_SYSTEM_PROMPT
@@ -22,7 +23,8 @@ with workflow.unsafe.imports_passed_through():
     from tools import calculate_debt_to_income, credit_check
 
 
-@workflow.defn
+#@workflow.defn # uncomment this when worker is running locally and comment out the line below
+@workflow.defn(versioning_behavior=VersioningBehavior.PINNED)
 class LoanUnderwritingWorkflow:
     def __init__(self) -> None:
         self.agent = TemporalAgent(

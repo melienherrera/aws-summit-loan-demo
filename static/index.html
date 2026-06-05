@@ -259,6 +259,48 @@
     .btn-approve:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 4px 20px var(--green-glow); }
     .btn-reject { background: var(--red); color: white; flex: 1; font-size: 1.1rem; padding: 1.1rem; }
     .btn-reject:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 4px 20px var(--red-glow); }
+    .bulk-actions {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .bulk-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .bulk-sub {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    .bulk-status {
+      font-size: 0.82rem;
+      min-height: 1.2rem;
+      color: var(--text-muted);
+    }
+    .bulk-button-row {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr;
+      gap: 0.5rem;
+    }
+    .btn-danger {
+      background: transparent;
+      color: var(--red);
+      border: 1px solid var(--red);
+      width: 100%;
+    }
+    .btn-danger:hover:not(:disabled) {
+      background: var(--red-glow);
+      color: #ffb4b4;
+    }
 
     /* ── Screen 2: Application Review ── */
     #screen-2 { max-width: 1000px; margin: 0 auto; padding: 2rem; }
@@ -421,6 +463,24 @@
         Submit to LENNY →
       </button>
     </div>
+    <div class="bulk-actions">
+      <div class="bulk-title">Load Test</div>
+      <p class="bulk-sub">
+        Start 100 workflows at once using generated dummy applicants.
+      </p>
+      <div class="bulk-button-row">
+        <button class="btn btn-secondary" onclick="startBulkWorkflows()" id="bulk-start-btn">
+          Bulk procress Load Underwriting applications
+        </button>
+        <button class="btn btn-approve" onclick="bulkDecide('approve')" id="bulk-approve-btn" disabled>
+          Bulk Approve
+        </button>
+        <button class="btn btn-danger" onclick="bulkDecide('reject')" id="bulk-reject-btn" disabled>
+          Bulk Reject
+        </button>
+      </div>
+      <div class="bulk-status" id="bulk-status"></div>
+    </div>
   </div>
 
   <!-- Divider -->
@@ -526,6 +586,7 @@
   let currentProfile = null;
   let currentWorkflowId = null;
   let pollInterval = null;
+  let bulkWorkflowIds = [];
 
   const CLOSINGS = {
     "Nicolas Cage": "May his castle dreams live on.",
@@ -590,6 +651,78 @@
     btn.textContent = 'Submit to LENNY →';
 
     startLoading(name);
+  }
+
+  // ── Bulk workflow start ──
+  async function startBulkWorkflows() {
+    const btn = document.getElementById('bulk-start-btn');
+    const bulkApproveBtn = document.getElementById('bulk-approve-btn');
+    const bulkRejectBtn = document.getElementById('bulk-reject-btn');
+    const status = document.getElementById('bulk-status');
+    btn.disabled = true;
+    bulkApproveBtn.disabled = true;
+    bulkRejectBtn.disabled = true;
+    btn.textContent = 'Starting 100 workflows...';
+    status.textContent = 'Submitting bulk start request...';
+
+    try {
+      const res = await fetch('/apply/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ count: 100 }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Bulk start failed');
+      }
+
+      const data = await res.json();
+      bulkWorkflowIds = data.workflow_ids || [];
+      bulkApproveBtn.disabled = bulkWorkflowIds.length === 0;
+      bulkRejectBtn.disabled = bulkWorkflowIds.length === 0;
+      status.textContent = `Started ${data.started} workflows.`;
+    } catch (err) {
+      bulkWorkflowIds = [];
+      status.textContent = 'Failed to start workflows. Check server logs.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Bulk procress Load Underwriting applications';
+    }
+  }
+
+  async function bulkDecide(decision) {
+    const status = document.getElementById('bulk-status');
+    const bulkApproveBtn = document.getElementById('bulk-approve-btn');
+    const bulkRejectBtn = document.getElementById('bulk-reject-btn');
+
+    if (!bulkWorkflowIds.length) {
+      status.textContent = 'Start a bulk batch first.';
+      return;
+    }
+
+    bulkApproveBtn.disabled = true;
+    bulkRejectBtn.disabled = true;
+    status.textContent = `Sending bulk ${decision} signal...`;
+
+    try {
+      const res = await fetch('/decide-bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ decision, workflow_ids: bulkWorkflowIds }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Bulk decision failed');
+      }
+
+      const data = await res.json();
+      status.textContent = `${decision.toUpperCase()} sent to ${data.signaled}/${data.requested} workflows.`;
+    } catch (err) {
+      status.textContent = `Failed to send bulk ${decision} signal.`;
+    } finally {
+      bulkApproveBtn.disabled = false;
+      bulkRejectBtn.disabled = false;
+    }
   }
 
   // ── Select profile → Screen 2 ──
