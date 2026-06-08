@@ -163,6 +163,31 @@ Then open **http://localhost:8000** in your browser and the Temporal UI at **htt
 
 ---
 
+## Failure Mode Demos
+
+Two demos are built into the worker, toggled via `.env`. Run them independently on separate applications.
+
+**Demo 1 — Flaky API retry** (`credit_check` activity)
+
+Simulates the credit bureau returning `429 Too Many Requests`. Temporal retries automatically — no intervention needed. Watch the activity go red → red → red → green in the Temporal UI.
+
+```bash
+DEMO_API_RETRY=true
+DEMO_API_RETRY_FAILURES=4   # failures before success (default: 4)
+```
+
+**Demo 2 — Worker crash** (`calculate_debt_to_income` activity)
+
+Pauses the activity for N seconds, giving you a window to kill the worker (`Ctrl+C`). Restart the worker and Temporal resumes exactly where it left off — no data lost, no re-running completed steps.
+
+```bash
+DEMO_CRASH_DELAY=15   # seconds to pause (kill the worker during this window)
+```
+
+> Make sure only one demo mode is active at a time. Both default to off (`DEMO_API_RETRY` unset, `DEMO_CRASH_DELAY=0`).
+
+---
+
 ## Deploying as a Serverless Worker
 
 The worker can be deployed as an AWS Lambda function invoked on demand by Temporal Cloud — no long-lived polling process required.

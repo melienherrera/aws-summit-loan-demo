@@ -15,7 +15,7 @@ from typing import Optional
 from temporalio import workflow
 from temporalio.contrib.strands import TemporalAgent
 from temporalio.contrib.strands.workflow import activity_as_tool
-from temporalio.common import VersioningBehavior
+from temporalio.common import RetryPolicy, VersioningBehavior
 
 with workflow.unsafe.imports_passed_through():
     from prompts import UNDERWRITING_SYSTEM_PROMPT
@@ -23,14 +23,21 @@ with workflow.unsafe.imports_passed_through():
     from tools import calculate_debt_to_income, credit_check
 
 
-#@workflow.defn # uncomment this when worker is running locally and comment out the line below
-@workflow.defn(versioning_behavior=VersioningBehavior.PINNED)
+@workflow.defn # local dev — no versioning behavior
+#@workflow.defn(versioning_behavior=VersioningBehavior.PINNED)  # Serverless Workers / Temporal Cloud
 class LoanUnderwritingWorkflow:
     def __init__(self) -> None:
         self.agent = TemporalAgent(
             start_to_close_timeout=timedelta(seconds=60),
             tools=[
-                activity_as_tool(credit_check, start_to_close_timeout=timedelta(seconds=30)),
+                activity_as_tool(
+                credit_check,
+                start_to_close_timeout=timedelta(seconds=30),
+                retry_policy=RetryPolicy(
+                    initial_interval=timedelta(seconds=2),
+                    maximum_attempts=3,
+                ),
+            ),
                 activity_as_tool(calculate_debt_to_income, start_to_close_timeout=timedelta(seconds=30)),
             ],
             system_prompt=UNDERWRITING_SYSTEM_PROMPT,
