@@ -5,6 +5,10 @@ workflow sandbox, which restricts stdlib internals that Strands uses internally.
 Each tool call becomes a visible Temporal activity in the event history.
 """
 
+import asyncio
+import os
+import random
+
 from temporalio import activity
 
 # Mocked credit scores keyed by applicant ID.
@@ -45,7 +49,22 @@ async def credit_check(applicant_id: str) -> str:
     Returns:
         A string summarising the credit score and rating.
     """
-    score = _CREDIT_SCORES.get(applicant_id, 0)
+    # ── Crash Demo: Scenario 1 ─────────────────────────────────────
+    # Set DEMO_CRASH_DELAY=15 in .env to slow down this activity and
+    # create a window to kill the worker mid-execution.
+    # Temporal will retry the activity automatically when the worker restarts.
+    delay = int(os.environ.get("DEMO_CRASH_DELAY", "0"))
+    if delay > 0:
+        activity.logger.info(f"[CRASH DEMO] credit_check sleeping {delay}s — kill the worker now!")
+        for _ in range(delay):
+            activity.heartbeat()
+            await asyncio.sleep(1)
+    # ──────────────────────────────────────────────────────────────
+
+    score = _CREDIT_SCORES.get(applicant_id)
+    if score is None:
+        # Custom applicant — generate a random score
+        score = random.randint(100, 800)
     rating = _rating(score)
     if score == 0:
         return f"Credit score: N/A | Rating: {rating} (no credit history on file)"
