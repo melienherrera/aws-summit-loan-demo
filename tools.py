@@ -3,6 +3,18 @@
 Running tools as activities (rather than inline @tool) avoids the Temporal
 workflow sandbox, which restricts stdlib internals that Strands uses internally.
 Each tool call becomes a visible Temporal activity in the event history.
+
+Failure Mode Demos
+──────────────────
+Demo 1 — Flaky API retry (credit_check):
+  Set DEMO_API_RETRY=true to simulate the credit bureau returning 429s.
+  Temporal retries automatically. Set DEMO_API_RETRY_FAILURES=N to control
+  how many times it fails before succeeding (default: 4).
+
+Demo 2 — Worker crash (calculate_debt_to_income):
+  Set DEMO_CRASH_DELAY=15 to pause this activity for N seconds.
+  Kill the worker during that window — Temporal resumes automatically
+  when the worker restarts, picking up exactly where it left off.
 """
 
 import asyncio
@@ -49,33 +61,23 @@ async def credit_check(applicant_id: str) -> str:
     Returns:
         A string summarising the credit score and rating.
     """
-    # ── Demo 1 : Simulate a Crash in the Activity ─────────────────────────────────────
-    # Set DEMO_CRASH_DELAY=15 in .env to slow down this activity and
-    # create a window to kill the worker mid-execution.
-    # Temporal will retry the activity automatically when the worker restarts.
-    delay = int(os.environ.get("DEMO_CRASH_DELAY", "0"))
-    if delay > 0:
-        activity.logger.info(f"[CRASH DEMO] credit_check sleeping {delay}s — kill the worker now!")
-        for _ in range(delay):
-            activity.heartbeat()
-            await asyncio.sleep(1)
-    # ──────────────────────────────────────────────────────────────
-
-    # ── Demo 2 : Simulate a Flaky Credit Bureau API ─────────────────────────────────────
-    # Set DEMO_API_RETRY=true to simulate a flaky credit bureau API.
-    # The first attempt raises a retryable error; Temporal automatically
-    # retries and the second attempt succeeds — no code changes needed.
+    # ── Demo 1: Flaky Credit Bureau API ───────────────────────────
+    # Simulates the credit bureau returning 429 Too Many Requests.
+    # Temporal retries automatically — no intervention needed.
+    # Set DEMO_API_RETRY=true and optionally DEMO_API_RETRY_FAILURES=N
     if os.environ.get("DEMO_API_RETRY", "").lower() == "true":
         attempt = activity.info().attempt
-        if attempt == 1:
+        max_failures = int(os.environ.get("DEMO_API_RETRY_FAILURES", "4"))
+        if attempt <= max_failures:
             activity.logger.warning(
-                "[API RETRY DEMO] Credit bureau returned 429 Too Many Requests — Temporal will retry automatically."
+                f"[DEMO 1] Attempt {attempt}/{max_failures} — credit bureau returned 429 Too Many Requests. Temporal will retry..."
             )
-            raise Exception("Credit bureau API error: 429 Too Many Requests. Retrying...")
-        else:
-            activity.logger.info(
-                f"[API RETRY DEMO] Attempt {attempt} — credit bureau responded successfully."
+            raise Exception(
+                f"Credit bureau API error: 429 Too Many Requests (attempt {attempt}/{max_failures})"
             )
+        activity.logger.info(
+            f"[DEMO 1] Attempt {attempt} — credit bureau responded successfully."
+        )
     # ──────────────────────────────────────────────────────────────
 
     score = _CREDIT_SCORES.get(applicant_id)
@@ -99,6 +101,21 @@ async def calculate_debt_to_income(annual_income: float, loan_amount: float) -> 
     Returns:
         A string with the DTI ratio and risk assessment.
     """
+    # ── Demo 2: Worker Crash ───────────────────────────────────────
+    # Pauses this activity so you have a window to kill the worker.
+    # Temporal resumes automatically when the worker restarts.
+    # Set DEMO_CRASH_DELAY=15 (seconds) in .env to enable.
+    delay = int(os.environ.get("DEMO_CRASH_DELAY", "0"))
+    if delay > 0:
+        activity.logger.info(
+            f"[DEMO 2] calculate_debt_to_income sleeping {delay}s — kill the worker now!"
+        )
+        for _ in range(delay):
+            activity.heartbeat()
+            await asyncio.sleep(1)
+        activity.logger.info("[DEMO 2] Worker restarted — resuming exactly where we left off.")
+    # ──────────────────────────────────────────────────────────────
+
     if annual_income <= 0:
         return "DTI: N/A — applicant reports zero or no income. High risk."
 
