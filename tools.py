@@ -49,7 +49,7 @@ async def credit_check(applicant_id: str) -> str:
     Returns:
         A string summarising the credit score and rating.
     """
-    # ── Crash Demo: Scenario 1 ─────────────────────────────────────
+    # ── Demo 1 : Simulate a Crash in the Activity ─────────────────────────────────────
     # Set DEMO_CRASH_DELAY=15 in .env to slow down this activity and
     # create a window to kill the worker mid-execution.
     # Temporal will retry the activity automatically when the worker restarts.
@@ -59,6 +59,23 @@ async def credit_check(applicant_id: str) -> str:
         for _ in range(delay):
             activity.heartbeat()
             await asyncio.sleep(1)
+    # ──────────────────────────────────────────────────────────────
+
+    # ── Demo 2 : Simulate a Flaky Credit Bureau API ─────────────────────────────────────
+    # Set DEMO_API_RETRY=true to simulate a flaky credit bureau API.
+    # The first attempt raises a retryable error; Temporal automatically
+    # retries and the second attempt succeeds — no code changes needed.
+    if os.environ.get("DEMO_API_RETRY", "").lower() == "true":
+        attempt = activity.info().attempt
+        if attempt == 1:
+            activity.logger.warning(
+                "[API RETRY DEMO] Credit bureau returned 429 Too Many Requests — Temporal will retry automatically."
+            )
+            raise Exception("Credit bureau API error: 429 Too Many Requests. Retrying...")
+        else:
+            activity.logger.info(
+                f"[API RETRY DEMO] Attempt {attempt} — credit bureau responded successfully."
+            )
     # ──────────────────────────────────────────────────────────────
 
     score = _CREDIT_SCORES.get(applicant_id)
