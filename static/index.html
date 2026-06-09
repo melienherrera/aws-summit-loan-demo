@@ -270,11 +270,10 @@
       gap: 0.6rem;
     }
     .bulk-title {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-muted);
-      font-weight: 600;
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 1.1rem;
+      font-weight: 700;
     }
     .bulk-sub {
       color: var(--text-muted);
@@ -463,24 +462,6 @@
         Submit to LENNY →
       </button>
     </div>
-    <div class="bulk-actions">
-      <div class="bulk-title">Load Test</div>
-      <p class="bulk-sub">
-        Start 100 workflows at once using generated dummy applicants.
-      </p>
-      <div class="bulk-button-row">
-        <button class="btn btn-secondary" onclick="startBulkWorkflows()" id="bulk-start-btn">
-          Bulk procress Load Underwriting applications
-        </button>
-        <button class="btn btn-approve" onclick="bulkDecide('approve')" id="bulk-approve-btn" disabled>
-          Bulk Approve
-        </button>
-        <button class="btn btn-danger" onclick="bulkDecide('reject')" id="bulk-reject-btn" disabled>
-          Bulk Reject
-        </button>
-      </div>
-      <div class="bulk-status" id="bulk-status"></div>
-    </div>
   </div>
 
   <!-- Divider -->
@@ -490,6 +471,22 @@
     <p class="profiles-sub">Ranging from completely reasonable to deeply questionable.</p>
     <div class="profile-grid" id="profile-grid">
       <!-- populated by JS -->
+    </div>
+    <div class="or-divider">or bulk process loan applications</div>
+    <div class="bulk-actions">
+      <div class="bulk-title">Load Test</div>
+      <div class="bulk-button-row">
+        <button class="btn btn-secondary" onclick="startBulkWorkflows()" id="bulk-start-btn">
+          Bulk Start Loan Application
+        </button>
+        <button class="btn btn-approve" onclick="bulkDecide('approve')" id="bulk-approve-btn" disabled>
+          Bulk Approve
+        </button>
+        <button class="btn btn-danger" onclick="bulkDecide('reject')" id="bulk-reject-btn" disabled>
+          Bulk Reject
+        </button>
+      </div>
+      <div class="bulk-status" id="bulk-status"></div>
     </div>
     <div style="height: 3rem;"></div>
   </div>
@@ -686,7 +683,7 @@
       status.textContent = 'Failed to start workflows. Check server logs.';
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Bulk procress Load Underwriting applications';
+      btn.textContent = 'Bulk Start Loan Underwriting Applications';
     }
   }
 
