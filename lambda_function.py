@@ -20,7 +20,7 @@ def configure(config: LambdaWorkerConfig) -> None:
 
 lambda_handler = run_worker(
     WorkerDeploymentVersion(
-        deployment_name="loan-underwriting-app",
+        deployment_name="loan_underwriting_app",
         build_id="build-1",
     ),
     configure,
