@@ -584,6 +584,7 @@
   let currentWorkflowId = null;
   let pollInterval = null;
   let bulkWorkflowIds = [];
+  let decisionInProgress = false;
 
   const CLOSINGS = {
     "Nicolas Cage": "May his castle dreams live on.",
@@ -659,14 +660,14 @@
     btn.disabled = true;
     bulkApproveBtn.disabled = true;
     bulkRejectBtn.disabled = true;
-    btn.textContent = 'Starting 100 workflows...';
+    btn.textContent = 'Starting 50 workflows...';
     status.textContent = 'Submitting bulk start request...';
 
     try {
       const res = await fetch('/apply/bulk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ count: 100 }),
+        body: JSON.stringify({ count: 50 }),
       });
 
       if (!res.ok) {
@@ -804,6 +805,7 @@
 
   // ── Show verdict → Screen 4 ──
   function showVerdict(assessment) {
+    decisionInProgress = false;
     document.getElementById('verdict-name').textContent = currentProfile.name;
     document.getElementById('workflow-id-display').textContent = `Workflow ID: ${currentWorkflowId}`;
 
@@ -825,7 +827,8 @@
 
   // ── Human decision → Screen 5 ──
   async function decide(decision) {
-    document.querySelectorAll('.btn-approve, .btn-reject').forEach(b => b.disabled = true);
+    if (decisionInProgress) return;
+    decisionInProgress = true;
     await fetch(`/decide/${currentWorkflowId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -836,9 +839,16 @@
         const r = await fetch(`/result/${currentWorkflowId}`);
         if (r.ok) {
           const result = await r.json();
-          if (result.ready) { clearInterval(poll); showResult(result); }
+          if (result.ready) {
+            clearInterval(poll);
+            decisionInProgress = false;
+            showResult(result);
+          }
         }
-      } catch(e) { /* retry */ }
+      } catch(e) {
+        decisionInProgress = false;
+        clearInterval(poll);
+      }
     }, 800);
   }
 
@@ -867,6 +877,7 @@
   function reset() {
     currentProfile = null;
     currentWorkflowId = null;
+    decisionInProgress = false;
     if (pollInterval) clearInterval(pollInterval);
     goTo(1);
   }
