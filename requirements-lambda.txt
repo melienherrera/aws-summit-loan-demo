@@ -1,0 +1,5 @@
+temporalio
+strands-agents
+pydantic
+python-dotenv
+boto3
