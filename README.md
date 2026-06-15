@@ -11,7 +11,10 @@ A booth demo for AWS Summit showing how [Temporal](https://temporal.io), [AWS Be
 | Feature | How it shows up |
 |---|---|
 | **Durable execution** | The agent workflow survives crashes and resumes exactly where it left off |
-| **Activity-backed tools** | Every tool call (credit check, DTI calculation) is a visible Temporal activity with retries |
+| **Multi-agent orchestration** | LENNY supervises two specialist sub-agents, then aggregates their reports into one recommendation |
+| **Agent-as-child-workflow** | Each specialist is a `TemporalAgent` in its own workflow — independently retryable and visible in the UI |
+| **Parallel fan-out** | The fraud and employment specialists run concurrently as child workflows |
+| **Activity-backed tools** | Every tool call (credit check, DTI, identity, velocity, employer, income) is a visible Temporal activity with retries |
 | **Human-in-the-loop** | Workflow pauses after AI assessment — a human makes the final approve/reject decision via Temporal signal |
 | **Strands integration** | `TemporalAgent` replaces manual activity wrapping — clean, idiomatic agent code |
 | **AWS Bedrock** | LENNY runs on Amazon Bedrock models via the Strands SDK |
