@@ -23,11 +23,12 @@ with workflow.unsafe.imports_passed_through():
     from tools import calculate_debt_to_income, credit_check
 
 
-@workflow.defn # local dev — no versioning behavior
-#@workflow.defn(versioning_behavior=VersioningBehavior.PINNED)  # Serverless Workers / Temporal Cloud
+#@workflow.defn # local dev — no versioning behavior
+@workflow.defn(versioning_behavior=VersioningBehavior.PINNED)  # Serverless Workers / Temporal Cloud
 class LoanUnderwritingWorkflow:
     def __init__(self) -> None:
         self.agent = TemporalAgent(
+            name="LoanUnderwritingAgent",
             start_to_close_timeout=timedelta(seconds=60),
             tools=[
                 activity_as_tool(
@@ -35,7 +36,7 @@ class LoanUnderwritingWorkflow:
                 start_to_close_timeout=timedelta(seconds=30),
                 retry_policy=RetryPolicy(
                     initial_interval=timedelta(seconds=2),
-                    maximum_attempts=3,
+                    maximum_attempts=4,
                 ),
             ),
                 activity_as_tool(calculate_debt_to_income, start_to_close_timeout=timedelta(seconds=30)),

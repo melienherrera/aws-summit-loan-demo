@@ -67,7 +67,7 @@ async def credit_check(applicant_id: str) -> str:
     # Set DEMO_API_RETRY=true and optionally DEMO_API_RETRY_FAILURES=N
     if os.environ.get("DEMO_API_RETRY", "").lower() == "true":
         attempt = activity.info().attempt
-        max_failures = int(os.environ.get("DEMO_API_RETRY_FAILURES", "4"))
+        max_failures = int(os.environ.get("DEMO_API_RETRY_FAILURES", "2"))
         if attempt <= max_failures:
             activity.logger.warning(
                 f"[DEMO 1] Attempt {attempt}/{max_failures} — credit bureau returned 429 Too Many Requests. Temporal will retry..."
@@ -83,7 +83,7 @@ async def credit_check(applicant_id: str) -> str:
     score = _CREDIT_SCORES.get(applicant_id)
     if score is None:
         # Custom applicant — generate a random score
-        score = random.randint(100, 800)
+        score = random.randint(400, 800)
     rating = _rating(score)
     if score == 0:
         return f"Credit score: N/A | Rating: {rating} (no credit history on file)"
