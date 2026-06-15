@@ -2,7 +2,7 @@
 
 A booth demo for AWS Summit showing how [Temporal](https://temporal.io), [AWS Bedrock](https://aws.amazon.com/bedrock/), and the [Strands Agents SDK](https://strandsagents.com/) work together to build durable, human-in-the-loop AI workflows — deployable as a Temporal Serverless Worker on AWS Lambda.
 
-**LENNY** (our AI underwriter) assesses loan applications using real tool calls. You make the final call.
+**LENNY** (our AI underwriter) now runs as a **supervisor over a panel of specialist sub-agents**: a Fraud & Identity agent and an Employment & Income agent each run as their own durable child workflow, LENNY synthesizes their findings together with a credit check and a debt-to-income calculation, and **you make the final call**.
 
 ---
 
@@ -21,29 +21,44 @@ A booth demo for AWS Summit showing how [Temporal](https://temporal.io), [AWS Be
 
 ## Architecture
 
-### Local Development
+### Multi-Agent Orchestration
+
 ```
-Browser UI  →  FastAPI  →  Temporal (local)
+Browser UI  →  FastAPI  →  Temporal
                                │
-                    ┌──────────┴──────────┐
-                    │     TemporalAgent    │  ← Strands SDK + Bedrock
-                    │  (LENNY the AI)      │
-                    └──────────┬──────────┘
+                               ▼
+            LoanUnderwritingSupervisorWorkflow   (LENNY)
                                │
-              ┌────────────────┴────────────────┐
-              │                                 │
-     credit_check (activity)     calculate_debt_to_income (activity)
-              │                                 │
-              └────────────────┬────────────────┘
-                               │
-                    [AI Recommendation]
-                               │
-                    ⏸ Workflow pauses
-                               │
-                    Human decides: Approve / Reject
-                               │  (Temporal signal)
-                    Workflow completes
+        ┌──────────────────────┴──────────────────────┐   ← parallel child workflows
+        ▼                                             ▼
+ FraudIdentityWorkflow                  EmploymentVerificationWorkflow
+ (TemporalAgent)                        (TemporalAgent)
+   • verify_identity_documents            • verify_employer
+   • check_application_velocity           • cross_check_income
+        │                                             │
+        └──────────────────────┬──────────────────────┘
+                               ▼
+                ⏱  "LoanUnderwriterAgent" timer marker
+                               ▼
+            LENNY (TemporalAgent) aggregates everything:
+              • fraud report + employment report (from the children)
+              • credit_check               (activity)
+              • calculate_debt_to_income   (activity)
+                               ▼
+                  [AI Recommendation: APPROVE / REJECT]
+                               ▼
+                       ⏸ Workflow pauses
+                               ▼
+            Human decides: Approve / Reject   (Temporal signal)
+                               ▼
+                       SupervisorDecision
 ```
+
+Each specialist runs as its own child workflow, so it shows up independently in the
+Temporal UI, retries on its own, and could later be routed to its own task queue /
+worker pool. LENNY keeps `credit_check` and `calculate_debt_to_income` as his own
+activity-backed tools; the two specialist reports arrive as durable child-workflow
+results and are folded into his prompt.
 
 ### Production (Serverless Workers on Temporal Cloud)
 ```
@@ -58,15 +73,9 @@ Browser UI  →  FastAPI  →  Temporal Cloud (AWS-hosted Namespace)
                     └──────────┬──────────┘
                                │
                     ┌──────────┴──────────┐
-                    │     TemporalAgent    │  ← Strands SDK
-                    │  (LENNY the AI)      │
+                    │     TemporalAgent   │  ← Strands SDK
+                    │  (LENNY the AI)     │
                     └──────────┬──────────┘
-                               │
-              ┌────────────────┴────────────────┐
-              │                                 │
-     credit_check (activity)     calculate_debt_to_income (activity)
-              │                                 │    (via IAM role,
-              └────────────────┬────────────────┘     no API key needed)
                                │
                     [AI Recommendation]
                                │
@@ -173,7 +182,7 @@ Simulates the credit bureau returning `429 Too Many Requests`. Temporal retries 
 
 ```bash
 DEMO_API_RETRY=true
-DEMO_API_RETRY_FAILURES=4   # failures before success (default: 4)
+DEMO_API_RETRY_FAILURES=3   # failures before success (default: 3)
 ```
 
 **Demo 2 — Worker crash** (`calculate_debt_to_income` activity)
