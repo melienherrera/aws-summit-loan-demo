@@ -1,5 +1,3 @@
-"""FastAPI web server for the loan underwriting booth demo."""
-
 import asyncio
 import os
 import random
@@ -16,6 +14,7 @@ from temporalio.client import Client
 
 from profiles import PROFILES, get_profile
 from shared import LoanApplicant
+from supervisor import LoanUnderwritingSupervisorWorkflow
 from workflow import LoanUnderwritingWorkflow
 
 load_dotenv()
@@ -145,10 +144,10 @@ def _build_dummy_applicant(index: int) -> LoanApplicant:
 
 
 async def _start_application_workflow(client: Client, applicant: LoanApplicant) -> str:
-    """Start one underwriting workflow and return workflow id."""
+    """Start the supervisor underwriting workflow (LENNY over sub-agents)."""
     workflow_id = f"loan-{applicant.id}-{generate(size=6)}"
     await client.start_workflow(
-        LoanUnderwritingWorkflow.run,
+        LoanUnderwritingSupervisorWorkflow.run,
         applicant,
         id=workflow_id,
         task_queue=TASK_QUEUE,
@@ -157,12 +156,12 @@ async def _start_application_workflow(client: Client, applicant: LoanApplicant) 
 
 
 async def _signal_decision(client: Client, workflow_id: str, decision: str) -> None:
-    """Send an approve/reject signal to a workflow."""
+    """Send an approve/reject signal (by name, so it works for any workflow)."""
     handle = client.get_workflow_handle(workflow_id)
     if decision == "approve":
-        await handle.signal(LoanUnderwritingWorkflow.approve)
+        await handle.signal("approve")
     elif decision == "reject":
-        await handle.signal(LoanUnderwritingWorkflow.reject)
+        await handle.signal("reject")
     else:
         raise HTTPException(status_code=400, detail="decision must be 'approve' or 'reject'")
 
@@ -196,12 +195,20 @@ async def apply_bulk(body: BulkApplyRequest):
     applicants = [_build_dummy_applicant(i) for i in range(count)]
 
     workflow_ids = await asyncio.gather(
-        *(_start_application_workflow(client, applicant) for applicant in applicants)
+        *(
+            client.start_workflow(
+                LoanUnderwritingWorkflow.run,
+                applicant,
+                id=f"loan-{applicant.id}-{generate(size=6)}",
+                task_queue=TASK_QUEUE,
+            )
+            for applicant in applicants
+        )
     )
 
     return {
         "started": len(workflow_ids),
-        "workflow_ids": workflow_ids,
+        "workflow_ids": [handle.id for handle in workflow_ids],
     }
 
 
@@ -221,7 +228,7 @@ async def apply(profile_id: str):
 async def get_assessment(workflow_id: str):
     client = await get_client()
     handle = client.get_workflow_handle(workflow_id)
-    assessment = await handle.query(LoanUnderwritingWorkflow.get_assessment)
+    assessment = await handle.query("get_assessment")
     return {"assessment": assessment, "ready": assessment is not None}
 
 
@@ -265,20 +272,14 @@ async def decide_bulk(body: BulkDecideRequest):
 async def get_result(workflow_id: str):
     client = await get_client()
     handle = client.get_workflow_handle(workflow_id)
-    # Use a query instead of handle.result() to avoid blocking the HTTP request
-    result = await handle.query(LoanUnderwritingWorkflow.get_final_decision)
+    # Query by name (returns a plain dict), so this works for the supervisor
+    # decision (incl. fraud/employment fields) and the single-agent decision alike.
+    result = await handle.query("get_final_decision")
     if result is None:
         return {"ready": False}
     if isinstance(result, dict):
         return {"ready": True, **result}
-    return {
-        "ready": True,
-        "applicant_name": result.applicant_name,
-        "ai_recommendation": result.ai_recommendation,
-        "human_decision": result.human_decision,
-        "human_override": result.human_override,
-        "ai_reasoning": result.ai_reasoning,
-    }
+    return {"ready": True, "decision": result}
 
 
 if __name__ == "__main__":
