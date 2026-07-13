@@ -9,6 +9,7 @@ Flow:
   4. Workflow completes with the final LoanDecision.
 """
 
+import os
 from datetime import timedelta
 from typing import Optional
 
@@ -22,9 +23,14 @@ with workflow.unsafe.imports_passed_through():
     from shared import LoanApplicant, LoanDecision
     from tools import calculate_debt_to_income, credit_check
 
+_versioning_kwargs = (
+    {"versioning_behavior": VersioningBehavior.PINNED}
+    if os.environ.get("TEMPORAL_ENV") == "cloud"
+    else {}
+)
 
-#@workflow.defn # local dev — no versioning behavior
-@workflow.defn(versioning_behavior=VersioningBehavior.PINNED)  # Serverless Workers / Temporal Cloud
+
+@workflow.defn(**_versioning_kwargs)
 class LoanUnderwritingWorkflow:
     def __init__(self) -> None:
         self.agent = TemporalAgent(

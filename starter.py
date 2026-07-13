@@ -7,7 +7,6 @@ Usage:
 """
 
 import asyncio
-import os
 import sys
 from typing import Optional
 
@@ -16,7 +15,7 @@ from nanoid import generate
 from temporalio.client import Client
 
 from profiles import PROFILES, get_profile, get_random_profile, list_profiles
-from shared import LoanApplicant, LoanDecision
+from shared import LoanApplicant, LoanDecision, temporal_connect_args
 from workflow import LoanUnderwritingWorkflow
 
 load_dotenv()
@@ -25,20 +24,7 @@ TASK_QUEUE = "loan-underwriting"
 
 
 async def _connect_temporal_client() -> Client:
-    address = os.environ.get("TEMPORAL_ADDRESS", "localhost:7233")
-    namespace = os.environ.get("TEMPORAL_NAMESPACE", "default")
-    api_key = os.environ.get("TEMPORAL_API_KEY")
-
-    connect_kwargs: dict[str, object] = {"namespace": namespace}
-    is_cloud_endpoint = ".tmprl.cloud" in address
-
-    if api_key:
-        connect_kwargs["api_key"] = api_key
-
-    if api_key or is_cloud_endpoint:
-        # Temporal Cloud requires TLS and supports API key auth.
-        connect_kwargs["tls"] = True
-
+    address, connect_kwargs = temporal_connect_args()
     return await Client.connect(address, **connect_kwargs)
 
 

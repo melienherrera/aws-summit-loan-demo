@@ -9,13 +9,16 @@ plus the original tools and the four mocked specialist tools as activities.
 """
 
 import asyncio
-import os
 
 from dotenv import load_dotenv
+
+load_dotenv()  # must run before local imports so workflow.py reads TEMPORAL_ENV at class-definition time
+
 from temporalio.client import Client
 from temporalio.contrib.strands import StrandsPlugin
 from temporalio.worker import Worker
 
+from shared import temporal_connect_args
 from tools import calculate_debt_to_income, credit_check
 from workflow import LoanUnderwritingWorkflow
 
@@ -29,33 +32,13 @@ from specialist_tools import (
     verify_identity_documents,
 )
 
-load_dotenv()
-
-TASK_QUEUE = "loan-underwriting-local"
-
-
-def _temporal_connect_options() -> dict[str, str | bool]:
-    """Build Temporal client connection options from environment variables."""
-    options: dict[str, str | bool] = {}
-    namespace = os.environ.get("TEMPORAL_NAMESPACE")
-    api_key = os.environ.get("TEMPORAL_API_KEY")
-
-    if namespace:
-        options["namespace"] = namespace
-    if api_key:
-        options["api_key"] = api_key
-        options["tls"] = True
-
-    return options
+TASK_QUEUE = "loan-underwriting"
 
 
 async def main() -> None:
     plugin = StrandsPlugin()
-    client = await Client.connect(
-        os.environ.get("TEMPORAL_ADDRESS", "localhost:7233"),
-        plugins=[plugin],
-        **_temporal_connect_options(),
-    )
+    address, connect_kwargs = temporal_connect_args()
+    client = await Client.connect(address, plugins=[plugin], **connect_kwargs)
 
     worker = Worker(
         client,

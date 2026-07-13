@@ -26,6 +26,7 @@ durable sub-agents instead of from his own tool calls.
 """
 
 import asyncio
+import os
 from dataclasses import dataclass
 from datetime import timedelta
 from typing import Optional
@@ -34,6 +35,12 @@ from temporalio import workflow
 from temporalio.contrib.strands import TemporalAgent
 from temporalio.contrib.strands.workflow import activity_as_tool
 from temporalio.common import RetryPolicy, VersioningBehavior
+
+_versioning_kwargs = (
+    {"versioning_behavior": VersioningBehavior.PINNED}
+    if os.environ.get("TEMPORAL_ENV") == "cloud"
+    else {}
+)
 
 with workflow.unsafe.imports_passed_through():
     from shared import LoanApplicant
@@ -108,7 +115,7 @@ class SupervisorDecision:
 # ---------------------------------------------------------------------------
 
 
-@workflow.defn(versioning_behavior=VersioningBehavior.PINNED)  # local dev. For Serverless Workers, add: (versioning_behavior=VersioningBehavior.PINNED)
+@workflow.defn(**_versioning_kwargs)
 class LoanUnderwritingSupervisorWorkflow:
     def __init__(self) -> None:
         # LENNY keeps his own activity-backed tools; the specialist evidence is

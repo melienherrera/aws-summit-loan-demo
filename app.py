@@ -1,5 +1,4 @@
 import asyncio
-import os
 import random
 import re
 from typing import Optional
@@ -13,7 +12,7 @@ from pydantic import BaseModel, Field
 from temporalio.client import Client
 
 from profiles import PROFILES, get_profile
-from shared import LoanApplicant
+from shared import LoanApplicant, temporal_connect_args
 from supervisor import LoanUnderwritingSupervisorWorkflow
 from workflow import LoanUnderwritingWorkflow
 
@@ -26,28 +25,11 @@ TASK_QUEUE = "loan-underwriting"
 _client: Optional[Client] = None
 
 
-def _temporal_connect_options() -> dict[str, str | bool]:
-    """Build Temporal client connection options from environment variables."""
-    options: dict[str, str | bool] = {}
-    namespace = os.environ.get("TEMPORAL_NAMESPACE")
-    api_key = os.environ.get("TEMPORAL_API_KEY")
-
-    if namespace:
-        options["namespace"] = namespace
-    if api_key:
-        options["api_key"] = api_key
-        options["tls"] = True
-
-    return options
-
-
 async def get_client() -> Client:
     global _client
     if _client is None:
-        _client = await Client.connect(
-            os.environ.get("TEMPORAL_ADDRESS", "localhost:7233"),
-            **_temporal_connect_options(),
-        )
+        address, connect_kwargs = temporal_connect_args()
+        _client = await Client.connect(address, **connect_kwargs)
     return _client
 
 

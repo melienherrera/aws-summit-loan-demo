@@ -17,6 +17,7 @@ so the agent loops stay within AWS Lambda execution limits when deployed as
 Temporal Serverless Workers.
 """
 
+import os
 from dataclasses import dataclass, field
 from datetime import timedelta
 
@@ -24,6 +25,12 @@ from temporalio import workflow
 from temporalio.contrib.strands import TemporalAgent
 from temporalio.contrib.strands.workflow import activity_as_tool
 from temporalio.common import RetryPolicy, VersioningBehavior
+
+_versioning_kwargs = (
+    {"versioning_behavior": VersioningBehavior.PINNED}
+    if os.environ.get("TEMPORAL_ENV") == "cloud"
+    else {}
+)
 
 with workflow.unsafe.imports_passed_through():
     from shared import LoanApplicant
@@ -80,7 +87,7 @@ def _field(assessment: str, label: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-@workflow.defn(versioning_behavior=VersioningBehavior.PINNED) # local dev. For Serverless Workers, add: (versioning_behavior=VersioningBehavior.PINNED)
+@workflow.defn(**_versioning_kwargs)
 class FraudIdentityAgent:
     def __init__(self) -> None:
         self.agent = TemporalAgent(
@@ -145,7 +152,7 @@ class FraudIdentityAgent:
 # ---------------------------------------------------------------------------
 
 
-@workflow.defn(versioning_behavior=VersioningBehavior.PINNED) # local dev. For Serverless Workers, add: (versioning_behavior=VersioningBehavior.PINNED)
+@workflow.defn(**_versioning_kwargs)
 class EmploymentVerificationAgent:
     def __init__(self) -> None:
         self.agent = TemporalAgent(

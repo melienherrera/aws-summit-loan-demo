@@ -143,11 +143,24 @@ uv sync
 cp .env.example .env
 ```
 
-Edit `.env` — for local development you only need:
+`.env` contains credentials for both local and cloud. Switch between them with a single line:
 
 ```bash
+TEMPORAL_ENV=local   # → localhost:7233 (default)
+TEMPORAL_ENV=cloud   # → Temporal Cloud (uses TEMPORAL_CLOUD_* vars)
+```
+
+Fill in the AWS credentials for your target environment:
+
+```bash
+# Local development
 AWS_REGION=us-west-2
 AWS_BEARER_TOKEN_BEDROCK=your-bedrock-bearer-token
+
+# Temporal Cloud — fill in once, toggle with TEMPORAL_ENV=cloud
+TEMPORAL_CLOUD_ADDRESS=<namespace>.<account>.tmprl.cloud:7233
+TEMPORAL_CLOUD_NAMESPACE=<namespace>.<account>
+TEMPORAL_CLOUD_API_KEY=<your-api-key>
 ```
 
 ---
